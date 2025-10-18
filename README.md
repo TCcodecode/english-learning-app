@@ -11,9 +11,9 @@
 
 | 书库主页 (Library View) | 学习模式 (Study Session) |
 | :---: | :---: |
-| ![Library View](./docs/images/library.png) | ![Study Session](./docs/images/study.png) |
+| ![Library View](./docs/images/booklibrary.png) | ![Study Session](./docs/images/learning.png) |
 | **AI 智能反馈 (AI Feedback)** | **创建学习本 (Book Creator)** |
-| ![AI Feedback](./docs/images/feedback.png) | ![Book Creator](./docs/images/creator.png) |
+| ![AI Feedback](./docs/images/feedback.png) | ![Book Creator](./docs/images/newbook.png) |
 
 
 ## 🚀 功能特性
