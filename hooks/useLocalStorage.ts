@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+// Fix: Import `React` to make React.* types available.
+import React, { useState, useEffect, useCallback } from 'react';
 
 export function useLocalStorage<T,>(key: string, initialValue: T): [T, React.Dispatch<React.SetStateAction<T>>] {
   const [storedValue, setStoredValue] = useState<T>(() => {
     try {
       const item = window.localStorage.getItem(key);
       return item ? JSON.parse(item) : initialValue;
-    // Fix: Added curly braces to the catch block to fix a syntax error that was causing a cascade of other errors.
     } catch (error) {
       console.error(error);
       return initialValue;
