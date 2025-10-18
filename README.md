@@ -11,9 +11,9 @@
 
 | 书库主页 (Library View) | 学习模式 (Study Session) |
 | :---: | :---: |
-| ![Library View](https://storage.googleapis.com/aistudio-ux-team-public/sdk_gallery/fluentflow/library.png) | ![Study Session](https://storage.googleapis.com/aistudio-ux-team-public/sdk_gallery/fluentflow/study.png) |
+| ![Library View](./docs/images/library.png) | ![Study Session](./docs/images/study.png) |
 | **AI 智能反馈 (AI Feedback)** | **创建学习本 (Book Creator)** |
-| ![AI Feedback](https://storage.googleapis.com/aistudio-ux-team-public/sdk_gallery/fluentflow/feedback.png) | ![Book Creator](https://storage.googleapis.com/aistudio-ux-team-public/sdk_gallery/fluentflow/creator.png) |
+| ![AI Feedback](./docs/images/feedback.png) | ![Book Creator](./docs/images/creator.png) |
 
 
 ## 🚀 功能特性
