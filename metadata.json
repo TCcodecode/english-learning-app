@@ -1,0 +1,5 @@
+{
+  "name": "FluentFlow AI",
+  "description": "An intelligent English learning application that uses AI-powered translation, spaced repetition based on the Ebbinghaus forgetting curve, and AI-driven feedback to help users master English sentences.",
+  "requestFramePermissions": []
+}
