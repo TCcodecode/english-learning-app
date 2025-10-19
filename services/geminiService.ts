@@ -1,8 +1,16 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
-// FIX: Initialize the GoogleGenAI client according to the documentation.
-// The API key must be retrieved from environment variables.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Check if API key is available
+const API_KEY = (import.meta.env as any).VITE_GEMINI_API_KEY;
+let ai: GoogleGenAI | null = null;
+
+// Only initialize AI client if API key is available
+if (API_KEY) {
+  ai = new GoogleGenAI({ apiKey: API_KEY });
+}
+
+// Offline mode flag
+const isOfflineMode = !ai;
 
 /**
  * Translates a batch of Chinese sentences to English using the Gemini API.
@@ -14,8 +22,16 @@ export const translateSentences = async (sentences: string[]): Promise<string[]>
     return [];
   }
 
+  // Offline mode - return placeholder translations
+  if (isOfflineMode) {
+    console.log("Offline mode: Using placeholder translations");
+    return sentences.map((sentence, index) => 
+      `[Offline Mode] Translation for sentence ${index + 1}: "${sentence}"`
+    );
+  }
+
   try {
-    const response = await ai.models.generateContent({
+    const response = await ai!.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: `Translate the following Chinese sentences to English. Provide only the English translations as a JSON array of strings.
 Chinese Sentences:
@@ -44,8 +60,10 @@ ${sentences.map(s => `- ${s}`).join('\n')}
 
   } catch (e) {
     console.error("Error translating sentences with AI:", e);
-    // Fallback behavior: return an array of error messages to indicate failure.
-    return sentences.map(() => "Translation failed.");
+    // Fallback behavior: return placeholder translations
+    return sentences.map((sentence, index) => 
+      `[AI Error] Translation for sentence ${index + 1}: "${sentence}"`
+    );
   }
 };
 
@@ -60,6 +78,18 @@ ${sentences.map(s => `- ${s}`).join('\n')}
 export const judgeTranslation = async (
     { chinese, referenceEnglish, userInput }: { chinese: string; referenceEnglish: string; userInput: string; }
 ): Promise<{ isCorrect: boolean; reason: string }> => {
+    // Offline mode - use simple string matching
+    if (isOfflineMode) {
+        console.log("Offline mode: Using simple string matching for translation judgment");
+        const isCorrect = userInput.trim().toLowerCase() === referenceEnglish.trim().toLowerCase();
+        return {
+            isCorrect,
+            reason: isCorrect 
+                ? 'Correct! (Offline mode: Exact match)' 
+                : `Incorrect. The expected answer was: "${referenceEnglish}" (Offline mode: Exact match required)`
+        };
+    }
+
     const prompt = `
 You are an expert Chinese-to-English translation judge. A user is learning Chinese and has provided a translation for a given sentence. Your task is to determine if their translation is correct. Minor grammatical errors or alternative phrasings are acceptable as long as the core meaning is preserved.
 
@@ -75,7 +105,7 @@ Return a JSON object with two keys: "isCorrect" (boolean) and "reason" (string).
 `;
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await ai!.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: prompt,
         config: {
@@ -118,6 +148,12 @@ Return a JSON object with two keys: "isCorrect" (boolean) and "reason" (string).
  * @returns A promise resolving to an array of {word, chinese} objects.
  */
 export const extractWords = async (userInput: string, referenceEnglish: string): Promise<{ word: string, chinese:string }[]> => {
+    // Offline mode - return empty array
+    if (isOfflineMode) {
+        console.log("Offline mode: No word extraction available");
+        return [];
+    }
+
     const prompt = `
 Given a correct English sentence, identify up to 5 key vocabulary words (nouns, verbs, adjectives, important adverbs) that a language learner should study. For each key word, provide its Chinese translation in the context of the sentence.
 
@@ -135,7 +171,7 @@ Do not include common words like "the", "a", "is", "over", etc. unless they are 
 `;
     
     try {
-        const response = await ai.models.generateContent({
+        const response = await ai!.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: prompt,
             config: {

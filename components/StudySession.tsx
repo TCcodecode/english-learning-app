@@ -51,6 +51,28 @@ export const StudySession: React.FC<Props> = ({ book, mode, onSessionEnd, onAddT
     onSessionEnd({ ...book, cards: updatedBookCards });
   }, [book, studyQueue, onSessionEnd]);
   
+  const handleNext = useCallback(() => {
+    if (currentIndex < studyQueue.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+      setUserInput('');
+      setAnswerState('answering');
+      setFeedback('');
+    } else {
+      handleEndSession();
+    }
+  }, [currentIndex, studyQueue.length, handleEndSession]);
+
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (answerState !== 'answering' && e.key === 'c') {
+        handleNext();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [answerState, handleNext]);
+  
   const handleAnswerSubmit = useCallback(async () => {
     if (!currentCard || userInput.trim() === '' || isJudging) return;
 
@@ -102,17 +124,6 @@ export const StudySession: React.FC<Props> = ({ book, mode, onSessionEnd, onAddT
     setIsJudging(false);
   }, [currentCard, userInput, isJudging, answerMode, onAddToWordBook, currentIndex]);
 
-  const handleNext = useCallback(() => {
-    if (currentIndex < studyQueue.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-      setUserInput('');
-      setAnswerState('answering');
-      setFeedback('');
-    } else {
-      handleEndSession();
-    }
-  }, [currentIndex, studyQueue.length, handleEndSession]);
-  
   const handleSkip = useCallback(() => {
      if (currentIndex < studyQueue.length - 1) {
       setCurrentIndex(currentIndex + 1);
@@ -206,13 +217,14 @@ export const StudySession: React.FC<Props> = ({ book, mode, onSessionEnd, onAddT
               </button>
             </div>
           ) : (
-            <div className="flex justify-center">
+            <div className="flex flex-col items-center space-y-2">
               <button
                 onClick={handleNext}
                 className="px-10 py-3 font-bold rounded-lg text-white bg-secondary hover:bg-green-500 transition flex items-center justify-center animate-pulse"
               >
                 Continue <ArrowRightIcon />
               </button>
+              <p className="text-sm text-text-secondary animate-pulse">Press <kbd className="px-2 py-1 bg-surface rounded text-xs font-mono">c</kbd> to continue</p>
             </div>
           )}
         </div>
