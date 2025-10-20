@@ -15,7 +15,6 @@
 | **AI 智能反馈 (AI Feedback)** | **创建学习本 (Book Creator)** |
 | ![AI Feedback](./docs/images/feedback.png) | ![Book Creator](./docs/images/newbook.png) |
 
-
 ## 🚀 功能特性
 
 -   **🤖 智能创建学习卡片**: 只需粘贴中文句子，AI 将自动为您翻译成地道的英文，一键生成学习卡片集。您也可以直接导入中英双语对照文本。
@@ -29,33 +28,168 @@
 
 ## 🛠️ 技术栈
 
--   **前端**: React, TypeScript, Tailwind CSS
+-   **前端**: React 19, TypeScript, Tailwind CSS, Vite
+-   **后端**: Node.js, Express, SQLite
 -   **核心 AI**: Google Gemini API (`@google/genai`)
--   **本地存储**: Browser `localStorage` for offline use
+-   **数据存储**: SQLite 数据库 + Browser `localStorage`
 
-## 🏃 如何使用
+## 📋 系统要求
 
-1.  在 **书库 (Library)** 页面点击 **“创建新书”** 按钮。
-2.  在创建页面，您可以选择 **“AI 翻译中文”** 模式（粘贴中文，AI 自动翻译）或 **“导入双语”** 模式（粘贴 `中文 === English` 格式的文本）。
-3.  填写书名后，点击 **“创建”**。
-4.  回到书库，选择您创建的书，点击 **“学习”** 或 **“复习错题”** 开始您的学习之旅。
-5.  在学习界面，根据中文提示输入您的英文翻译。
-6.  提交答案后，您会立即收到来自 AI 的智能反馈。
-7.  答错的句子中的生词会被自动添加到您的生词本中。
+-   Node.js >= 16.0.0
+-   npm >= 8.0.0
+-   Google Gemini API Key
 
-##  roadmap 未来规划
+## 🚀 快速开始
+
+### 1. 克隆项目
+
+```bash
+git clone https://github.com/TCcodecode/english-learning-app.git
+cd english-learning-app
+```
+
+### 2. 安装依赖
+
+```bash
+npm install
+```
+
+### 3. 配置环境变量
+
+创建 `.env` 文件并添加您的 Gemini API Key：
+
+```env
+VITE_GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+> 💡 **获取 Gemini API Key**: 访问 [Google AI Studio](https://aistudio.google.com/app/apikey) 免费获取 API Key
+
+### 4. 启动应用
+
+#### 方式一：完整启动（推荐）
+同时启动前端和后端服务：
+
+```bash
+npm run dev:full
+```
+
+#### 方式二：分别启动
+如果需要分别启动前端和后端：
+
+```bash
+# 终端1：启动后端服务器
+npm run server
+
+# 终端2：启动前端开发服务器
+npm run dev
+```
+
+### 5. 访问应用
+
+打开浏览器访问：`http://localhost:5173`
+
+## 📖 使用指南
+
+### 创建学习书籍
+
+1.  在 **书库 (Library)** 页面点击 **"创建新书"** 按钮
+2.  选择创建方式：
+    -   **AI 翻译中文**：粘贴中文内容，AI 自动翻译成英文
+    -   **导入双语**：粘贴 `中文 === English` 格式的文本
+3.  填写书名并点击 **"创建"**
+
+### 开始学习
+
+1.  在书库中选择您创建的书籍
+2.  点击 **"学习"** 开始新学习或复习到期卡片
+3.  点击 **"复习错题"** 专门练习错误题目
+4.  根据中文提示输入英文翻译
+5.  提交答案后查看 AI 反馈
+6.  答错的生词会自动添加到生词本
+
+### 学习模式说明
+
+-   **固定单词输入**：按空格逐个输入单词，适合初学者
+-   **AI 智能评判**：自由输入句子，AI 理解语义并评判，适合进阶学习
+
+## 🧠 艾宾浩斯记忆算法
+
+应用内置科学的间隔重复系统，通过以下记忆等级安排复习：
+
+| 等级 | 复习间隔 | 说明 |
+|------|----------|------|
+| Level 1 | 5分钟 | 初次学习 |
+| Level 2 | 30分钟 | 短期巩固 |
+| Level 3 | 12小时 | 过夜复习 |
+| Level 4 | 1天 | 每日复习 |
+| Level 5 | 2天 | 间隔延长 |
+| Level 6 | 4天 | 中期记忆 |
+| Level 7 | 7天 | 周期复习 |
+| Level 8 | 15天 | 长期记忆 |
+| Level 9 | 30天 | 深度记忆 |
+| Level 10 | 90天 | 已掌握 |
+
+**算法特点**：
+- ✅ 正确回答时升级到下一记忆等级
+- ❌ 错误回答时记忆等级减半（最低保持1级）
+- 🔄 错误答案会被记录，支持针对性复习
+- 📊 所有学习进度持久化存储
+
+## 🔧 开发命令
+
+```bash
+# 安装依赖
+npm install
+
+# 开发模式（前后端同时启动）
+npm run dev:full
+
+# 仅启动前端
+npm run dev
+
+# 仅启动后端
+npm run server
+
+# 构建生产版本
+npm run build
+
+# 预览生产版本
+npm run preview
+```
+
+## 📁 项目结构
+
+```
+english-learning-app/
+├── components/          # React 组件
+│   ├── StudySession.tsx    # 学习会话组件
+│   ├── Library.tsx         # 书库组件
+│   └── ...
+├── services/           # 业务逻辑服务
+│   ├── ebbinghausService.ts  # 艾宾浩斯算法实现
+│   ├── geminiService.ts      # Gemini AI 服务
+│   └── databaseService.ts    # 数据库服务
+├── database/           # 数据库相关
+│   ├── init.sql            # 数据库初始化脚本
+│   └── learning_progress.db # SQLite 数据库文件
+├── hooks/              # React 自定义 Hooks
+├── library/            # 学习材料存储
+└── docs/               # 文档和截图
+```
+
+## 🚀 未来规划
 
 我们致力于将 FluentFlow AI 打造成最懂你的语言学习伴侣。以下是我们的未来开发计划：
 
--   [ ] **单词本学习功能**: 为自动生成的生词本开发专属的学习和复习模式。
--   [ ] **发音练习与评测**: 集成 TTS（文本转语音）和 STT（语音转文本）技术，提供跟读功能，并由 AI 对您的发音进行打分和指导。
--   [ ] **数据云端同步**: 支持用户注册登录，将学习进度和词书同步到云端，实现跨设备学习。
--   [ ] **更丰富的学习内容**: 提供由社区或官方创建的预制学习本，涵盖四六级、托福雅思、商务英语等不同领域。
--   [ ] **学习统计与可视化**: 引入数据可视化图表，展示您的学习进度、记忆曲线、每日学习时长等，让进步清晰可见。
+-   [ ] **单词本学习功能**: 为自动生成的生词本开发专属的学习和复习模式
+-   [ ] **发音练习与评测**: 集成 TTS 和 STT 技术，提供跟读功能和 AI 发音评分
+-   [ ] **数据云端同步**: 支持用户注册登录，实现跨设备学习进度同步
+-   [ ] **预制学习内容**: 提供四六级、托福雅思、商务英语等官方学习本
+-   [ ] **学习统计可视化**: 数据图表展示学习进度、记忆曲线、每日学习时长
 
 ## 🤝 贡献
 
-我们欢迎所有形式的贡献！如果您有任何想法、建议或发现了 Bug，请随时提交 [Issues](https://github.com/your-repo/fluentflow-ai/issues)。
+我们欢迎所有形式的贡献！如果您有任何想法、建议或发现了 Bug，请随时提交 [Issues](https://github.com/TCcodecode/english-learning-app/issues)。
 
 如果您想贡献代码，请遵循以下步骤：
 
@@ -68,3 +202,14 @@
 ## 📄 许可证
 
 本项目采用 MIT 许可证。详情请见 `LICENSE` 文件。
+
+## 🙏 致谢
+
+-   [Google Gemini](https://ai.google.dev/) - 提供强大的 AI 能力
+-   [React](https://reactjs.org/) - 构建用户界面的 JavaScript 库
+-   [Tailwind CSS](https://tailwindcss.com/) - 实用优先的 CSS 框架
+-   [Vite](https://vitejs.dev/) - 下一代前端构建工具
+
+---
+
+⭐ 如果这个项目对您有帮助，请给我们一个 Star！
