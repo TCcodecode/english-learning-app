@@ -173,7 +173,7 @@ english-learning-app/
 │   ├── init.sql            # 数据库初始化脚本
 │   └── learning_progress.db # SQLite 数据库文件
 ├── hooks/              # React 自定义 Hooks
-├── library/            # 学习材料存储
+├── scripts/            # 数据库迁移脚本
 └── docs/               # 文档和截图
 ```
 
