@@ -2,6 +2,7 @@ const express = require('express');
 const fs = require('fs').promises;
 const path = require('path');
 const cors = require('cors');
+const { DatabaseService } = require('./dist/databaseService.cjs');
 
 const app = express();
 const PORT = 3001;
@@ -265,9 +266,203 @@ app.put('/api/library/books/:bookName/sections/:sectionName', async (req, res) =
   }
 });
 
+// 新的SQLite API路由
+
+// 获取带学习进度的书籍列表
+app.get('/api/study-books', async (req, res) => {
+  try {
+    const db = DatabaseService.getInstance();
+    const books = await db.getAllBooks();
+    
+    const booksWithCards = [];
+    for (const book of books) {
+      const cards = await db.getCardsByBookId(book.id);
+      const now = Date.now();
+      const dueCards = cards.filter(card => card.next_review <= now && !card.is_skipped).length;
+      const mistakeCards = cards.filter(card => card.incorrectAnswers.length > 0).length;
+      
+      booksWithCards.push({
+        id: book.id,
+        title: book.title,
+        cards: cards.map(card => ({
+          id: card.id,
+          chinese: card.chinese,
+          english: card.english,
+          memoryLevel: card.memory_level,
+          lastReviewed: card.last_reviewed,
+          nextReview: card.next_review,
+          incorrectAnswers: card.incorrectAnswers,
+          isSkipped: card.is_skipped,
+          correctStreak: card.correct_streak
+        })),
+        createdAt: book.created_at,
+        dueCards,
+        mistakeCards
+      });
+    }
+    
+    res.json(booksWithCards);
+  } catch (error) {
+    console.error('Error loading study books:', error);
+    res.status(500).json({ error: 'Failed to load study books' });
+  }
+});
+
+// 获取特定书籍的学习进度
+app.get('/api/study-books/:bookId', async (req, res) => {
+  try {
+    const { bookId } = req.params;
+    const db = DatabaseService.getInstance();
+    
+    const book = await db.getBook(bookId);
+    if (!book) {
+      return res.status(404).json({ error: 'Book not found' });
+    }
+    
+    const cards = await db.getCardsByBookId(bookId);
+    const studyBook = {
+      id: book.id,
+      title: book.title,
+      cards: cards.map(card => ({
+        id: card.id,
+        chinese: card.chinese,
+        english: card.english,
+        memoryLevel: card.memory_level,
+        lastReviewed: card.last_reviewed,
+        nextReview: card.next_review,
+        incorrectAnswers: card.incorrectAnswers,
+        isSkipped: card.is_skipped,
+        correctStreak: card.correct_streak
+      })),
+      createdAt: book.created_at
+    };
+    
+    res.json(studyBook);
+  } catch (error) {
+    console.error(`Error loading study book ${req.params.bookId}:`, error);
+    res.status(500).json({ error: 'Failed to load study book' });
+  }
+});
+
+// 更新书籍学习进度
+app.put('/api/study-books/:bookId', async (req, res) => {
+  try {
+    const { bookId } = req.params;
+    const { cards } = req.body;
+    
+    if (!Array.isArray(cards)) {
+      return res.status(400).json({ error: 'Cards array is required' });
+    }
+    
+    const db = DatabaseService.getInstance();
+    
+    // 更新每张卡片
+    for (const card of cards) {
+      await db.updateCard(card.id, {
+        memory_level: card.memoryLevel,
+        last_reviewed: card.lastReviewed,
+        next_review: card.nextReview,
+        incorrect_answers: JSON.stringify(card.incorrectAnswers),
+        is_skipped: card.isSkipped,
+        correct_streak: card.correctStreak
+      });
+    }
+    
+    // 更新书籍时间戳
+    await db.updateBookTimestamp(bookId);
+    
+    res.json({ message: 'Study book updated successfully' });
+  } catch (error) {
+    console.error(`Error updating study book ${req.params.bookId}:`, error);
+    res.status(500).json({ error: 'Failed to update study book' });
+  }
+});
+
+// 创建带学习进度的新书籍
+app.post('/api/study-books', async (req, res) => {
+  try {
+    const { id, title, cards = [] } = req.body;
+    
+    if (!id || !title) {
+      return res.status(400).json({ error: 'Book id and title are required' });
+    }
+    
+    const db = DatabaseService.getInstance();
+    
+    // 创建书籍记录
+    await db.createBook(id, title);
+    
+    // 创建卡片记录
+    for (const card of cards) {
+      await db.createCard({
+        bookId: id,
+        chinese: card.chinese,
+        english: card.english,
+        memoryLevel: card.memoryLevel,
+        lastReviewed: card.lastReviewed,
+        nextReview: card.nextReview,
+        incorrectAnswers: card.incorrectAnswers,
+        isSkipped: card.isSkipped,
+        correctStreak: card.correctStreak
+      });
+    }
+    
+    // 同时创建文件系统记录（保持兼容性）
+    const bookPath = path.join(LIBRARY_PATH, id);
+    await fs.mkdir(bookPath, { recursive: true });
+    
+    if (cards.length > 0) {
+      const content = cards.map(card => `${card.chinese}===${card.english}`).join('\n');
+      const sectionPath = path.join(bookPath, 'section_1.txt');
+      await fs.writeFile(sectionPath, content, 'utf-8');
+    } else {
+      const defaultSectionPath = path.join(bookPath, 'section_1.txt');
+      await fs.writeFile(defaultSectionPath, '', 'utf-8');
+    }
+    
+    res.json({ message: 'Study book created successfully', id, title });
+  } catch (error) {
+    console.error('Error creating study book:', error);
+    res.status(500).json({ error: 'Failed to create study book' });
+  }
+});
+
+// 删除书籍（包括学习进度）
+app.delete('/api/study-books/:bookId', async (req, res) => {
+  try {
+    const { bookId } = req.params;
+    const db = DatabaseService.getInstance();
+    
+    // 删除数据库记录
+    await db.deleteBook(bookId);
+    
+    // 删除文件系统记录
+    const bookPath = path.join(LIBRARY_PATH, bookId);
+    try {
+      await fs.rm(bookPath, { recursive: true, force: true });
+    } catch (error) {
+      // 文件系统删除失败不影响数据库删除
+      console.warn('Failed to delete file system book:', error);
+    }
+    
+    res.json({ message: 'Study book deleted successfully' });
+  } catch (error) {
+    console.error(`Error deleting study book ${req.params.bookId}:`, error);
+    res.status(500).json({ error: 'Failed to delete study book' });
+  }
+});
+
 // 启动服务器
 async function startServer() {
   await ensureLibraryDir();
+  
+  // 初始化数据库
+  try {
+    const db = DatabaseService.getInstance();
+    console.log('Database initialized');
+  } catch (error) {
+    console.error('Failed to initialize database:', error);
+  }
   
   app.listen(PORT, () => {
     console.log(`Library server running on http://localhost:${PORT}`);

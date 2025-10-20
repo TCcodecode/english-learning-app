@@ -27,15 +27,7 @@ export function useLibraryService() {
     try {
       setError(null);
       
-      let sections = [];
-      if (content) {
-        sections = [{
-          name: 'section_1',
-          content
-        }];
-      }
-      
-      const newBook = await LibraryService.createBook(bookName, sections);
+      const newBook = await LibraryService.createBook(bookName, content);
       setStudyBooks(prev => [...prev, newBook]);
       return newBook;
     } catch (err) {
@@ -65,40 +57,8 @@ export function useLibraryService() {
     try {
       setError(null);
       
-      // 首先加载原始的书籍结构以保持章节信息
-      const originalLibraryBook = await LibraryService.loadBook(updatedBook.id);
-      if (!originalLibraryBook) {
-        throw new Error(`Original book ${updatedBook.id} not found`);
-      }
-      
-      // 获取原始书籍的章节结构
-      const response = await fetch(`/api/library/books/${encodeURIComponent(updatedBook.id)}`);
-      if (!response.ok) {
-        throw new Error(`Failed to load original book structure: ${updatedBook.id}`);
-      }
-      const originalBookStructure = await response.json();
-      
-      // 将更新后的卡片数据重新分配到原始章节中
-      // 由于卡片失去了原始章节信息，我们将所有卡片放入第一个章节
-      // 这是一个简化的解决方案，理想情况下应该保存卡片的原始章节信息
-      if (originalBookStructure.sections.length > 0) {
-        const firstSection = originalBookStructure.sections[0];
-        firstSection.content = updatedBook.cards.map(card => `${card.chinese}===${card.english}`).join('\n');
-        
-        // 更新第一个章节
-        await LibraryService.updateSection(updatedBook.id, firstSection.name, firstSection.content);
-        
-        // 如果有其他章节，保持它们不变
-        for (let i = 1; i < originalBookStructure.sections.length; i++) {
-          const section = originalBookStructure.sections[i];
-          // 这里不需要更新，因为我们只修改了第一个章节的内容
-        }
-      } else {
-        // 如果没有章节，创建一个默认章节
-        await LibraryService.addSection(updatedBook.id, 'section_1', 
-          updatedBook.cards.map(card => `${card.chinese}===${card.english}`).join('\n')
-        );
-      }
+      // 使用新的SQLite API更新学习进度
+      await LibraryService.updateBookProgress(updatedBook);
       
       // 更新本地状态
       setStudyBooks(prev =>

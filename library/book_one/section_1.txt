@@ -1,2 +1,30 @@
-嘿嘿，跟你说一声===Hey just a heads up
-领导层在问为什么第二季度报告迟了===leadership's asking why the q2 report was late
+1. 嘿，跟你说一声===Hey just a heads up
+2. 领导层在问为什么第二季度报告迟了===leadership's asking why the q2 report was late
+3. 我跟他们说你还在处理呢===I told them you were still working on it
+4. 有意思，因为我周一下午3点02分就发了，还抄送给你两次===interesting because I sent it Monday 302pm cc'd you twice
+5. 肯定是弄丢了===must have gotten lost
+6. 我刚重新发了，也会转发给他们===just resent it and I'll forward it to them
+7. 我已经转发了，还附上了之前的Slack聊天记录===already did and also attached the original slack combo
+8. 就是我发给你的那部分===where I sent it to you
+9. 时间戳也包含在内了===time stamps included
+10. 行了，没必要这么小题大做===okay no need to be dramatic
+11. 你知道他们会觉得这是你的错===you know they're gonna think this was your fault
+12. 我知道，所以我才直接把发送回执转发给领导层了，以防万一===I know that's why, I forwarded the receipt directly to leadership just in case
+13. 你还抄送他们了？===you cc'd them
+14. 是被抄送，我就喜欢这种“不经意”的曝光===be cc'd, I like a quite reveal
+15. 你把这事搞得太夸张了===you're making this a bigger deal than it is
+16. 你自己犯的错，倒怪到我头上===you blamed me for your mistake
+17. 本来就是这么回事===that is the deal
+18. 你当时就该直接跟我说一声===you should've just messaged me
+19. 你当时就该承担起责任===you should've just taken accountability
+20. 哇，你这态度有点冲啊===wow this feels a little hostile
+21. 如果坦诚相待也算冲===if transparency feels hostile
+22. 那可能你平时习惯了太多遮遮掩掩吧===maybe you're used to too much cover
+23. 我本来没觉得这是什么大事===I didn't think it was a big deal
+24. 我只是想让领导层满意而已===just trying to keep leadership happy
+25. 那或许你就别为了这个把同事推出去背锅啊===then maybe don't throw your teammates under the bus to do it
+26. 怎么，你现在成完人了？===so what you're perfect now
+27. 我不是完人，但我不会利用别人的沉默来攻击人===no, but I don't weaponize other people's silence
+28. 这可是你的拿手好戏===that's your specialty
+29. 你还真把所有东西都发给领导层了？===You really sent leadership everything
+30. 对，为了清晰起见，我还附上了一份摘要，里面有分点的行动项，还把时间线标出来了===yep, even attached a summary for clarity, bullet points action items, highlighted timeline.

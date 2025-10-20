@@ -14,86 +14,117 @@ export class LibraryService {
   private static readonly LIBRARY_PATH = './library';
 
   /**
-   * 从文件系统加载所有书籍
+   * 从数据库加载所有书籍（包含学习进度）
    */
   static async loadAllBooks(): Promise<StudyBook[]> {
     try {
-      // 在浏览器环境中，我们需要通过 API 来访问文件系统
-      // 这里我们先创建一个模拟的实现，后续可以通过 Node.js API 或文件上传来处理
-      const response = await fetch('/api/library/books');
+      const response = await fetch('/api/study-books');
       if (!response.ok) {
-        throw new Error('Failed to load books');
+        throw new Error('Failed to load study books');
       }
-      const books: LibraryBook[] = await response.json();
-      return books.map(book => this.convertLibraryBookToStudyBook(book));
+      const books: StudyBook[] = await response.json();
+      return books;
     } catch (error) {
-      console.error('Error loading books from library:', error);
-      // 如果无法访问文件系统，返回空数组或回退到 localStorage
+      console.error('Error loading study books:', error);
       return [];
     }
   }
 
   /**
-   * 加载特定书籍
+   * 加载特定书籍（包含学习进度）
    */
   static async loadBook(bookName: string): Promise<StudyBook | null> {
     try {
-      const response = await fetch(`/api/library/books/${encodeURIComponent(bookName)}`);
+      const response = await fetch(`/api/study-books/${encodeURIComponent(bookName)}`);
       if (!response.ok) {
-        throw new Error(`Failed to load book: ${bookName}`);
+        throw new Error(`Failed to load study book: ${bookName}`);
       }
-      const book: LibraryBook = await response.json();
-      return this.convertLibraryBookToStudyBook(book);
+      const book: StudyBook = await response.json();
+      return book;
     } catch (error) {
-      console.error(`Error loading book ${bookName}:`, error);
+      console.error(`Error loading study book ${bookName}:`, error);
       return null;
     }
   }
 
   /**
-   * 创建新书籍
+   * 创建新书籍（包含学习进度）
    */
-  static async createBook(bookName: string, sections: LibrarySection[] = []): Promise<StudyBook> {
+  static async createBook(bookName: string, content?: string): Promise<StudyBook> {
     try {
-      const newBook: LibraryBook = {
-        name: bookName,
-        sections
-      };
+      let cards: SentenceCard[] = [];
+      
+      if (content) {
+        cards = this.parseContentToCards(content);
+      }
 
-      const response = await fetch('/api/library/books', {
+      const response = await fetch('/api/study-books', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(newBook),
+        body: JSON.stringify({
+          id: bookName,
+          title: bookName,
+          cards: cards
+        }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create book');
+        throw new Error('Failed to create study book');
       }
 
-      const createdBook: LibraryBook = await response.json();
-      return this.convertLibraryBookToStudyBook(createdBook);
+      const result = await response.json();
+      return {
+        id: result.id,
+        title: result.title,
+        cards: cards,
+        createdAt: Date.now()
+      };
     } catch (error) {
-      console.error('Error creating book:', error);
+      console.error('Error creating study book:', error);
       throw error;
     }
   }
 
   /**
-   * 删除书籍
+   * 删除书籍（包含学习进度）
    */
   static async deleteBook(bookName: string): Promise<void> {
     try {
-      const response = await fetch(`/api/library/books/${encodeURIComponent(bookName)}`, {
+      const response = await fetch(`/api/study-books/${encodeURIComponent(bookName)}`, {
         method: 'DELETE',
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to delete book: ${bookName}`);
+        throw new Error(`Failed to delete study book: ${bookName}`);
       }
     } catch (error) {
-      console.error(`Error deleting book ${bookName}:`, error);
+      console.error(`Error deleting study book ${bookName}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * 更新书籍学习进度
+   */
+  static async updateBookProgress(updatedBook: StudyBook): Promise<void> {
+    try {
+      const response = await fetch(`/api/study-books/${encodeURIComponent(updatedBook.id)}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          cards: updatedBook.cards
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update study book: ${updatedBook.id}`);
+      }
+    } catch (error) {
+      console.error(`Error updating study book ${updatedBook.id}:`, error);
       throw error;
     }
   }
