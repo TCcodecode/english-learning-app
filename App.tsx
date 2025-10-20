@@ -110,7 +110,12 @@ const App: React.FC = () => {
       case View.BookDetail:
           const book = studyBooks.find(b => b.id === selectedBookId);
           if (book) {
-              return <StudyBookDetail book={book} onBack={handleBackToLibrary} />;
+              return <StudyBookDetail 
+                book={book} 
+                onBack={handleBackToLibrary}
+                onBookUpdate={updateBook}
+                onBookDelete={handleDeleteBook}
+              />;
           }
           setCurrentView(View.Library);
           return null;

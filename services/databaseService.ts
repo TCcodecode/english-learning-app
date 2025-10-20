@@ -103,6 +103,87 @@ export class DatabaseService {
         });
     }
 
+    public async updateBookTitle(id: string, title: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.db.run(
+                'UPDATE books SET title = ?, updated_at = ? WHERE id = ?',
+                [title, Date.now(), id],
+                (err) => {
+                    if (err) reject(err);
+                    else resolve();
+                }
+            );
+        });
+    }
+
+    public async clearBookCards(bookId: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.db.run(
+                'DELETE FROM cards WHERE book_id = ?',
+                [bookId],
+                (err) => {
+                    if (err) reject(err);
+                    else resolve();
+                }
+            );
+        });
+    }
+
+    public async deleteCard(cardId: number): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.db.run(
+                'DELETE FROM cards WHERE id = ?',
+                [cardId],
+                (err) => {
+                    if (err) reject(err);
+                    else resolve();
+                }
+            );
+        });
+    }
+
+    public async createCards(cards: any[]): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const now = Date.now();
+            const stmt = this.db.prepare(`
+                INSERT INTO cards (
+                    book_id, chinese, english, memory_level, last_reviewed, 
+                    next_review, incorrect_answers, is_skipped, correct_streak, 
+                    created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `);
+
+            this.db.serialize(() => {
+                this.db.run('BEGIN TRANSACTION');
+                
+                cards.forEach(card => {
+                    stmt.run([
+                        card.bookId,
+                        card.chinese,
+                        card.english,
+                        card.memoryLevel || 1,
+                        card.lastReviewed || null,
+                        card.nextReview,
+                        JSON.stringify(card.incorrectAnswers || []),
+                        card.isSkipped || false,
+                        card.correctStreak || 0,
+                        now,
+                        now
+                    ]);
+                });
+
+                this.db.run('COMMIT', (err) => {
+                    stmt.finalize();
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve();
+                    }
+                });
+            });
+        });
+    }
+
     // 卡片操作
     public async createCard(card: any): Promise<void> {
         return new Promise((resolve, reject) => {

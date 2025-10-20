@@ -57,3 +57,15 @@ export const SparklesIcon = ({ className = 'h-5 w-5' }: { className?: string }) 
         <path fillRule="evenodd" d="M5 2a1 1 0 00-1 1v1.586l-1.707 1.707a1 1 0 001.414 1.414L5 6.414V8a1 1 0 002 0V6.414l1.293 1.293a1 1 0 001.414-1.414L8 4.586V3a1 1 0 00-2 0v1.586l-1.293-1.293A1 1 0 005 2zm11.707 3.293a1 1 0 00-1.414-1.414L14 5.586V4a1 1 0 00-2 0v1.586l-1.293-1.293a1 1 0 00-1.414 1.414L11 7.586V9a1 1 0 002 0V7.586l1.293 1.293a1 1 0 001.414-1.414L14 6.414V5a1 1 0 002 0v-.586l1.707-1.707zM5 10a1 1 0 00-1 1v.586l-1.707 1.707a1 1 0 001.414 1.414L5 13.414V15a1 1 0 002 0v-1.586l1.293 1.293a1 1 0 001.414-1.414L8 11.586V11a1 1 0 00-2 0v.586l-1.293-1.293A1 1 0 005 10z" clipRule="evenodd" />
     </svg>
 );
+
+export const EditIcon = ({ className = 'h-5 w-5' }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 20 20" fill="currentColor">
+        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+    </svg>
+);
+
+export const UploadIcon = ({ className = 'h-5 w-5' }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 20 20" fill="currentColor">
+        <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+    </svg>
+);

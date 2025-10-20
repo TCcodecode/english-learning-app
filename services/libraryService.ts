@@ -116,6 +116,7 @@ export class LibraryService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          title: updatedBook.title,
           cards: updatedBook.cards
         }),
       });
@@ -125,6 +126,86 @@ export class LibraryService {
       }
     } catch (error) {
       console.error(`Error updating study book ${updatedBook.id}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * 重命名书籍
+   */
+  static async renameBook(bookId: string, newTitle: string): Promise<void> {
+    try {
+      const response = await fetch(`/api/study-books/${encodeURIComponent(bookId)}/rename`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ title: newTitle }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to rename study book: ${bookId}`);
+      }
+    } catch (error) {
+      console.error(`Error renaming study book ${bookId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * 清空书籍中的所有卡片
+   */
+  static async clearBookCards(bookId: string): Promise<void> {
+    try {
+      const response = await fetch(`/api/study-books/${encodeURIComponent(bookId)}/clear`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to clear study book: ${bookId}`);
+      }
+    } catch (error) {
+      console.error(`Error clearing study book ${bookId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * 删除单个卡片
+   */
+  static async deleteCard(bookId: string, cardId: number): Promise<void> {
+    try {
+      const response = await fetch(`/api/study-books/${encodeURIComponent(bookId)}/cards/${cardId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete card: ${cardId}`);
+      }
+    } catch (error) {
+      console.error(`Error deleting card ${cardId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * 批量添加卡片到书籍
+   */
+  static async addCardsToBook(bookId: string, cards: SentenceCard[]): Promise<void> {
+    try {
+      const response = await fetch(`/api/study-books/${encodeURIComponent(bookId)}/cards`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ cards }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to add cards to study book: ${bookId}`);
+      }
+    } catch (error) {
+      console.error(`Error adding cards to study book ${bookId}:`, error);
       throw error;
     }
   }

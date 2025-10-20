@@ -348,13 +348,18 @@ app.get('/api/study-books/:bookId', async (req, res) => {
 app.put('/api/study-books/:bookId', async (req, res) => {
   try {
     const { bookId } = req.params;
-    const { cards } = req.body;
+    const { title, cards } = req.body;
     
     if (!Array.isArray(cards)) {
       return res.status(400).json({ error: 'Cards array is required' });
     }
     
     const db = DatabaseService.getInstance();
+    
+    // 如果提供了标题，更新书籍标题
+    if (title && typeof title === 'string') {
+      await db.updateBookTitle(bookId, title);
+    }
     
     // 更新每张卡片
     for (const card of cards) {
@@ -375,6 +380,83 @@ app.put('/api/study-books/:bookId', async (req, res) => {
   } catch (error) {
     console.error(`Error updating study book ${req.params.bookId}:`, error);
     res.status(500).json({ error: 'Failed to update study book' });
+  }
+});
+
+// 重命名书籍
+app.put('/api/study-books/:bookId/rename', async (req, res) => {
+  try {
+    const { bookId } = req.params;
+    const { title } = req.body;
+    
+    if (!title || typeof title !== 'string') {
+      return res.status(400).json({ error: 'Book title is required' });
+    }
+    
+    const db = DatabaseService.getInstance();
+    await db.updateBookTitle(bookId, title);
+    
+    res.json({ message: 'Book renamed successfully' });
+  } catch (error) {
+    console.error(`Error renaming book ${req.params.bookId}:`, error);
+    res.status(500).json({ error: 'Failed to rename book' });
+  }
+});
+
+// 清空书籍中的所有卡片
+app.delete('/api/study-books/:bookId/clear', async (req, res) => {
+  try {
+    const { bookId } = req.params;
+    const db = DatabaseService.getInstance();
+    
+    await db.clearBookCards(bookId);
+    
+    res.json({ message: 'Book cards cleared successfully' });
+  } catch (error) {
+    console.error(`Error clearing book ${req.params.bookId}:`, error);
+    res.status(500).json({ error: 'Failed to clear book' });
+  }
+});
+
+// 删除单个卡片
+app.delete('/api/study-books/:bookId/cards/:cardId', async (req, res) => {
+  try {
+    const { bookId, cardId } = req.params;
+    const db = DatabaseService.getInstance();
+    
+    await db.deleteCard(parseInt(cardId));
+    
+    res.json({ message: 'Card deleted successfully' });
+  } catch (error) {
+    console.error(`Error deleting card ${req.params.cardId}:`, error);
+    res.status(500).json({ error: 'Failed to delete card' });
+  }
+});
+
+// 批量添加卡片到书籍
+app.post('/api/study-books/:bookId/cards', async (req, res) => {
+  try {
+    const { bookId } = req.params;
+    const { cards } = req.body;
+    
+    if (!Array.isArray(cards)) {
+      return res.status(400).json({ error: 'Cards array is required' });
+    }
+    
+    const db = DatabaseService.getInstance();
+    
+    // 为每张卡片添加bookId
+    const cardsWithBookId = cards.map(card => ({
+      ...card,
+      bookId: bookId
+    }));
+    
+    await db.createCards(cardsWithBookId);
+    
+    res.json({ message: 'Cards added successfully' });
+  } catch (error) {
+    console.error(`Error adding cards to book ${req.params.bookId}:`, error);
+    res.status(500).json({ error: 'Failed to add cards' });
   }
 });
 
